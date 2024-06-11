@@ -101,8 +101,7 @@ const getInitialValues = () => ({
 
 const getInitialErrors = () => ({
   fullName: '',
-  size: '',
-  toppings: '',
+  size: ''
 });
 
 export default function Form() {
@@ -118,16 +117,25 @@ export default function Form() {
 
   const onChange = (event) => {
     const { type, name, value, checked } = event.target;
-    const newValue = type === 'checkbox' ? checked : value;
-    setValues((prevValues) => ({
-      ...prevValues,
-      [name]: newValue,
-    }));
-    yup
-      .reach(formSchema, name)
-      .validate(newValue)
-      .then(() => setErrors((prevErrors) => ({ ...prevErrors, [name]: '' })))
-      .catch((err) => setErrors((prevErrors) => ({ ...prevErrors, [name]: err.errors[0] })));
+    if (type === 'checkbox') {
+      const newToppings = checked
+        ? [...values.toppings, value]
+        : values.toppings.filter((t) => t !== value);
+      setValues((prevValues) => ({
+        ...prevValues,
+        toppings: newToppings,
+      }));
+    } else {
+      setValues((prevValues) => ({
+        ...prevValues,
+        [name]: value,
+      }));
+      yup
+        .reach(formSchema, name)
+        .validate(value)
+        .then(() => setErrors((prevErrors) => ({ ...prevErrors, [name]: '' })))
+        .catch((err) => setErrors((prevErrors) => ({ ...prevErrors, [name]: err.errors[0] })));
+    }
   };
 
   const onSubmit = (event) => {
@@ -137,11 +145,11 @@ export default function Form() {
       .then((res) => {
         setValues(getInitialValues());
         setServerSuccess(res.data.message);
-        setServerFailure('');
+        setServerFailure();
       })
       .catch((err) => {
-        setServerFailure(err.response?.data?.message || 'Server error');
-        setServerSuccess('');
+        setServerFailure(err.response.data.message);
+        setServerSuccess();
       });
   };
 
@@ -176,25 +184,20 @@ export default function Form() {
       </div>
 
       <div className="input-group">
+        <label>Toppings:</label>
         {toppings.map((topping) => (
           <label key={topping.topping_id}>
             <input
               name="toppings"
               type="checkbox"
-              value={topping.text}
-              checked={values.toppings.includes(topping.text)}
-              onChange={(event) => {
-                const newToppings = event.target.checked
-                  ? [...values.toppings, topping.text]
-                  : values.toppings.filter((t) => t !== topping.text);
-                setValues({ ...values, toppings: newToppings });
-              }}
+              value={topping.topping_id}
+              checked={values.toppings.includes(topping.topping_id)}
+              onChange={onChange}
             />
             {topping.text}
             <br />
           </label>
         ))}
-        {errors.toppings && <div className="validation">{errors.toppings}</div>}
       </div>
 
       <div>
