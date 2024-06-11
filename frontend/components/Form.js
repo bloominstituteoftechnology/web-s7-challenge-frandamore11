@@ -68,8 +68,7 @@ import axios from 'axios';
 const validationErrors = {
   fullNameTooShort: 'full name must be at least 3 characters',
   fullNameTooLong: 'full name must be at most 20 characters',
-  sizeIncorrect: 'size must be S or M or L',
-  toppingsOptions: 'Toppings must be either Pepperoni, Green Peppers, Pineapple, Mushrooms, or Ham',
+  sizeIncorrect: 'size must be S or M or L'
 };
 
 const toppings = [
@@ -91,15 +90,7 @@ const formSchema = yup.object().shape({
     .string()
     .trim()
     .required(validationErrors.sizeIncorrect)
-    .oneOf(['S', 'M', 'L'], validationErrors.sizeIncorrect),
-  toppings: yup
-    .array()
-    .of(yup.string())
-    .test(
-      'toppingsOptions',
-      validationErrors.toppingsOptions,
-      (value) => value.every((val) => ['Pepperoni', 'Green Peppers', 'Pineapple', 'Mushrooms', 'Ham'].includes(val))
-    ),
+    .oneOf(['S', 'M', 'L'], validationErrors.sizeIncorrect)
 });
 
 const getInitialValues = () => ({
